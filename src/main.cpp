@@ -13,6 +13,13 @@ using namespace vex;
 
 // A global instance of competition
 competition Competition;
+brain TimsCrocsBrain;
+controller JakesJ0Y;
+
+motor lrMotor(PORT1, ratio18_1, false);
+motor rrmotor(PORT2, ratio18_1, false);
+motor lfMotor(PORT3, ratio18_1, false);
+motor rfMotor(PORT4, ratio18_1, false);
 
 // define your global instances of motors and other devices here
 
@@ -27,20 +34,18 @@ competition Competition;
 /*---------------------------------------------------------------------------*/
 
 void pre_auton(void) {
-
-  // All activities that occur before the competition starts
-  // Example: clearing encoders, setting servo positions, ...
+  lrMotor.setBrake(brake);
+  rrmotor.setBrake(brake);
+  lfMotor.setBrake(brake);
+  rfMotor.setBrake(brake);
 }
 
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              Autonomous Task                              */
-/*                                                                           */
-/*  This task is used to control your robot during the autonomous phase of   */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
+void stopFunc(void){
+  lrMotor.stop();
+  rrmotor.stop();
+  lfMotor.stop();
+  rfMotor.stop();
+}
 
 void autonomous(void) {
   // ..........................................................................
@@ -48,27 +53,20 @@ void autonomous(void) {
   // ..........................................................................
 }
 
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*                              User Control Task                            */
-/*                                                                           */
-/*  This task is used to control your robot during the user control phase of */
-/*  a VEX Competition.                                                       */
-/*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
-/*---------------------------------------------------------------------------*/
-
 void usercontrol(void) {
   // User control code here, inside the loop
   while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
+    double ForwardSpeed = JakesJ0Y.Axis3.position(percent);
+    double TurnSpeed = JakesJ0Y.Axis1.position(percent);
 
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
+    if(ForwardSpeed < 10 && ForwardSpeed > -10 && TurnSpeed < 10 && TurnSpeed > -10){
+      stopFunc();
+    } else {
+      rfMotor.spin(fwd, ForwardSpeed - TurnSpeed, pct);
+      lfMotor.spin(fwd, ForwardSpeed + TurnSpeed, pct); 
+      lrMotor.spin(fwd, ForwardSpeed + TurnSpeed, pct);
+      rrmotor.spin(fwd, ForwardSpeed - TurnSpeed, pct);
+    }
 
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
