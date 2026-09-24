@@ -56,14 +56,14 @@ void autonomous(void) {
 void usercontrol(void) {
   // User control code here, inside the loop
   while (1) {
-    double ForwardSpeed = JakesJ0Y.Axis3.position(percent);
-    double TurnSpeed = JakesJ0Y.Axis1.position(percent);
+    double ForwardSpeed = JakesJ0Y.Axis1.position(percent);
+    double TurnSpeed = JakesJ0Y.Axis3.position(percent);
 
     if(ForwardSpeed < 10 && ForwardSpeed > -10 && TurnSpeed < 10 && TurnSpeed > -10){
       stopFunc();
     } else {
       rfMotor.spin(fwd, ForwardSpeed - TurnSpeed, pct);
-      lfMotor.spin(fwd, ForwardSpeed + TurnSpeed, pct); 
+      lfMotor.spin(fwd, ForwardSpeed + TurnSpeed, pct);
       lrMotor.spin(fwd, ForwardSpeed + TurnSpeed, pct);
       rrmotor.spin(fwd, ForwardSpeed - TurnSpeed, pct);
     }
