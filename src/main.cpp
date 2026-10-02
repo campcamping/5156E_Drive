@@ -13,13 +13,16 @@ using namespace vex;
 
 // A global instance of competition
 competition Competition;
-brain TimsCrocsBrain;
+brain TimsCrocksBrain;
 controller JakesJ0Y;
 
 motor lrMotor(PORT1, ratio18_1, false);
 motor rrmotor(PORT2, ratio18_1, false);
 motor lfMotor(PORT3, ratio18_1, false);
 motor rfMotor(PORT4, ratio18_1, false);
+motor Blahmotor(PORT8, ratio6_1, false);
+gps GPS(PORT5);
+aivision Vision(PORT6, aivision::ALL_AIOBJS);
 
 // define your global instances of motors and other devices here
 
@@ -48,24 +51,58 @@ void stopFunc(void){
 }
 
 void autonomous(void) {
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
+  while (1) {
+    TimsCrocksBrain.Screen.setCursor(1, 1);
+    TimsCrocksBrain.Screen.clearLine(1);
+    Vision.takeSnapshot(aivision::ALL_AIOBJS);
+    if (Vision.objects[0].exists) {
+      TimsCrocksBrain.Screen.print("%d", Vision.largestObject.id);
+      if(Vision.objects[0].centerX > 180) {
+        rfMotor.spin(reverse, 100, pct);
+        rrmotor.spin(reverse, 100, pct);
+        lfMotor.spin(fwd, 100, pct);
+        lrMotor.spin(fwd, 100, pct);
+      } else if(Vision.objects[0].centerX < 140) {
+        rfMotor.spin(fwd, 100, pct);
+        rrmotor.spin(fwd, 100, pct);
+        lfMotor.spin(reverse, 100, pct);
+        lrMotor.spin(reverse, 100, pct);
+      } else if (Vision.objects[0].width < 100) {
+        rfMotor.spin(fwd, 100, pct);
+        rrmotor.spin(fwd, 100, pct);
+        lfMotor.spin(fwd, 100, pct);
+        lrMotor.spin(fwd, 100, pct);
+      } else {
+        stopFunc();
+      }
+    } else {
+      stopFunc();
+    }
+    wait(50, msec);
+  }
 }
 
 void usercontrol(void) {
   // User control code here, inside the loop
   while (1) {
-    double ForwardSpeed = JakesJ0Y.Axis1.position(percent);
-    double TurnSpeed = JakesJ0Y.Axis3.position(percent);
+    double TurnSpeed = JakesJ0Y.Axis1.position(percent);
+    double ForwardSpeed = JakesJ0Y.Axis3.position(percent);
 
     if(ForwardSpeed < 10 && ForwardSpeed > -10 && TurnSpeed < 10 && TurnSpeed > -10){
       stopFunc();
     } else {
-      rfMotor.spin(fwd, ForwardSpeed - TurnSpeed, pct);
-      lfMotor.spin(fwd, ForwardSpeed + TurnSpeed, pct);
-      lrMotor.spin(fwd, ForwardSpeed + TurnSpeed, pct);
-      rrmotor.spin(fwd, ForwardSpeed - TurnSpeed, pct);
+      rfMotor.spin(fwd, TurnSpeed - ForwardSpeed, pct);
+      lfMotor.spin(fwd, TurnSpeed + ForwardSpeed, pct);
+      lrMotor.spin(fwd, TurnSpeed + ForwardSpeed, pct);
+      rrmotor.spin(fwd, TurnSpeed - ForwardSpeed, pct);
+    }
+
+    if(JakesJ0Y.ButtonR1.pressing()){
+      Blahmotor.spin(fwd, 100, pct);
+    } else if(JakesJ0Y.ButtonL1.pressing()){
+      Blahmotor.spin(reverse, 100, pct);
+    } else {
+      Blahmotor.stop();
     }
 
     wait(20, msec); // Sleep the task for a short amount of time to
