@@ -20,10 +20,12 @@ motor lrMotor(PORT1, ratio18_1, false);
 motor rrmotor(PORT2, ratio18_1, false);
 motor lfMotor(PORT3, ratio18_1, false);
 motor rfMotor(PORT4, ratio18_1, false);
-motor Blahmotor(PORT8, ratio6_1, false);
-gps GPS(PORT5);
-aivision Vision(PORT6, aivision::ALL_AIOBJS);
-
+motor IntakeMotor(PORT8, ratio36_1, false);
+motor LiftMotor(PORT9, ratio6_1, false);
+motor ClawSpinMotor(PORT10, ratio18_1, false);
+motor ClawMotor(PORT11, ratio18_1, false);
+aivision Vision(PORT12, aivision::ALL_AIOBJS);
+  
 // define your global instances of motors and other devices here
 
 /*---------------------------------------------------------------------------*/
@@ -51,35 +53,31 @@ void stopFunc(void){
 }
 
 void autonomous(void) {
-  while (1) {
+  /*while (1) {
     TimsCrocksBrain.Screen.setCursor(1, 1);
     TimsCrocksBrain.Screen.clearLine(1);
     Vision.takeSnapshot(aivision::ALL_AIOBJS);
     if (Vision.objects[0].exists) {
-      TimsCrocksBrain.Screen.print("%d", Vision.largestObject.id);
-      if(Vision.objects[0].centerX > 180) {
-        rfMotor.spin(reverse, 100, pct);
-        rrmotor.spin(reverse, 100, pct);
-        lfMotor.spin(fwd, 100, pct);
-        lrMotor.spin(fwd, 100, pct);
-      } else if(Vision.objects[0].centerX < 140) {
-        rfMotor.spin(fwd, 100, pct);
-        rrmotor.spin(fwd, 100, pct);
-        lfMotor.spin(reverse, 100, pct);
-        lrMotor.spin(reverse, 100, pct);
-      } else if (Vision.objects[0].width < 100) {
-        rfMotor.spin(fwd, 100, pct);
-        rrmotor.spin(fwd, 100, pct);
-        lfMotor.spin(fwd, 100, pct);
-        lrMotor.spin(fwd, 100, pct);
-      } else {
-        stopFunc();
+      if (Vision.objects[0].id == 1) {
+        TimsCrocksBrain.Screen.print("Yellow-Blue Pin Detected");
+        if(Vision.objects[0].centerX > 180) {
+         FrontRight.spin(reverse, 15, pct);
+         FrontLeft.spin(fwd, 15, pct);
+        } else if(Vision.objects[0].centerX < 140) {
+         FrontRight.spin(fwd, 15, pct);
+         FrontLeft.spin(reverse, 15, pct);
+        } else if (Vision.objects[0].width < 150) {
+          FrontRight.spin(fwd, 15, pct);
+          FrontLeft.spin(fwd, 15, pct);
+        } else {
+          stopFunc();
+        }
       }
     } else {
       stopFunc();
     }
     wait(50, msec);
-  }
+  }*/
 }
 
 void usercontrol(void) {
@@ -98,11 +96,11 @@ void usercontrol(void) {
     }
 
     if(JakesJ0Y.ButtonR1.pressing()){
-      Blahmotor.spin(fwd, 100, pct);
+      IntakeMotor.spin(fwd, 100, pct);
     } else if(JakesJ0Y.ButtonL1.pressing()){
-      Blahmotor.spin(reverse, 100, pct);
+      IntakeMotor.spin(reverse, 100, pct);
     } else {
-      Blahmotor.stop();
+      IntakeMotor.stop();
     }
 
     wait(20, msec); // Sleep the task for a short amount of time to
