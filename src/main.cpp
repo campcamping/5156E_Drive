@@ -21,9 +21,11 @@ motor rrmotor(PORT2, ratio18_1, false);
 motor lfMotor(PORT3, ratio18_1, false);
 motor rfMotor(PORT4, ratio18_1, false);
 motor IntakeMotor(PORT8, ratio36_1, false);
-motor LiftMotor(PORT9, ratio6_1, false);
-motor ClawSpinMotor(PORT10, ratio18_1, false);
-motor ClawMotor(PORT11, ratio18_1, false);
+motor LiftMotor1(PORT9, ratio6_1, true);
+motor LiftMotor2(PORT13, ratio6_1, false);
+motor_group LiftMotor(LiftMotor1, LiftMotor2);
+motor ClawSpinMotor(PORT6, ratio18_1, false);
+motor ClawMotor(PORT7, ratio18_1, false);
 aivision Vision(PORT12, aivision::ALL_AIOBJS);
   
 // define your global instances of motors and other devices here
@@ -43,6 +45,12 @@ void pre_auton(void) {
   rrmotor.setBrake(brake);
   lfMotor.setBrake(brake);
   rfMotor.setBrake(brake);
+  LiftMotor1.setBrake(hold);
+  LiftMotor2.setBrake(hold);
+  ClawSpinMotor.setBrake(hold);
+  ClawMotor.setBrake(brake);
+  IntakeMotor.setBrake(brake);
+  ClawSpinMotor.setPosition(100, degrees);
 }
 
 void stopFunc(void){
@@ -53,6 +61,10 @@ void stopFunc(void){
 }
 
 void autonomous(void) {
+  rfMotor.spinFor(fwd, 1, turns, false);
+  lfMotor.spinFor(fwd, 1, turns, false);
+  lrMotor.spinFor(fwd, 1, turns, false);
+  rrmotor.spinFor(fwd, 1, turns, false);
   /*while (1) {
     TimsCrocksBrain.Screen.setCursor(1, 1);
     TimsCrocksBrain.Screen.clearLine(1);
@@ -95,13 +107,38 @@ void usercontrol(void) {
       rrmotor.spin(fwd, TurnSpeed - ForwardSpeed, pct);
     }
 
-    if(JakesJ0Y.ButtonR1.pressing()){
+    if(JakesJ0Y.ButtonL1.pressing()){
       IntakeMotor.spin(fwd, 100, pct);
-    } else if(JakesJ0Y.ButtonL1.pressing()){
+    } else if(JakesJ0Y.ButtonL2.pressing()){
       IntakeMotor.spin(reverse, 100, pct);
     } else {
       IntakeMotor.stop();
     }
+
+    if(JakesJ0Y.ButtonUp.pressing()) {
+      LiftMotor.spin(fwd, 100, pct);
+    } else if(JakesJ0Y.ButtonDown.pressing()) {
+      LiftMotor.spin(reverse, 100, pct);
+    } else {
+      LiftMotor.stop();
+    }
+
+    if(JakesJ0Y.ButtonRight.pressing()) {
+      ClawSpinMotor.spin(fwd, 100, pct);
+    } else if (JakesJ0Y.ButtonLeft.pressing()) {
+      ClawSpinMotor.spin(, 100, pct);
+    } else {
+      ClawSpinMotor.stop();
+    }
+
+    if(JakesJ0Y.ButtonR2.pressing()) {
+      ClawMotor.spin(fwd, 100, pct);
+    } else if (JakesJ0Y.ButtonR1.pressing()) {
+      ClawMotor.spin(reverse, 100, pct);    
+    } else {
+      ClawMotor.stop();
+    }
+
 
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
