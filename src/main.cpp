@@ -21,12 +21,13 @@ motor rrmotor(PORT2, ratio18_1, false);
 motor lfMotor(PORT3, ratio18_1, false);
 motor rfMotor(PORT4, ratio18_1, false);
 motor IntakeMotor(PORT8, ratio36_1, false);
-motor LiftMotor1(PORT9, ratio6_1, true);
-motor LiftMotor2(PORT13, ratio6_1, false);
-motor_group LiftMotor(LiftMotor1, LiftMotor2);
-motor ClawSpinMotor(PORT6, ratio18_1, false);
+motor LiftMotor(PORT6, ratio6_1, true);
+motor ClawSpinMotor(PORT14, ratio18_1, false);
 motor ClawMotor(PORT7, ratio18_1, false);
-aivision Vision(PORT12, aivision::ALL_AIOBJS);
+motor ToggleMotor(PORT12, ratio18_1, false);
+motor_group LeftDrive(lfMotor, lrMotor);
+motor_group RightDrive(rfMotor, rrmotor);
+aivision Vision(PORT15, aivision::ALL_AIOBJS);
   
 // define your global instances of motors and other devices here
 
@@ -45,12 +46,14 @@ void pre_auton(void) {
   rrmotor.setBrake(brake);
   lfMotor.setBrake(brake);
   rfMotor.setBrake(brake);
-  LiftMotor1.setBrake(hold);
-  LiftMotor2.setBrake(hold);
+  LiftMotor.setBrake(hold);
   ClawSpinMotor.setBrake(hold);
-  ClawMotor.setBrake(brake);
+  ClawMotor.setBrake(hold);
   IntakeMotor.setBrake(brake);
   ClawSpinMotor.setPosition(100, degrees);
+  ClawMotor.setVelocity(50, rpm);
+  LiftMotor.setVelocity(100, pct);
+  ToggleMotor.setBrake(brake);
 }
 
 void stopFunc(void){
@@ -61,10 +64,8 @@ void stopFunc(void){
 }
 
 void autonomous(void) {
-  rfMotor.spinFor(fwd, 1, turns, false);
-  lfMotor.spinFor(fwd, 1, turns, false);
-  lrMotor.spinFor(fwd, 1, turns, false);
-  rrmotor.spinFor(fwd, 1, turns, false);
+  RightDrive.spinFor(fwd, 1, turns, false);
+  LeftDrive.spinFor(fwd, 1, turns, false);
   /*while (1) {
     TimsCrocksBrain.Screen.setCursor(1, 1);
     TimsCrocksBrain.Screen.clearLine(1);
@@ -101,15 +102,13 @@ void usercontrol(void) {
     if(ForwardSpeed < 10 && ForwardSpeed > -10 && TurnSpeed < 10 && TurnSpeed > -10){
       stopFunc();
     } else {
-      rfMotor.spin(fwd, TurnSpeed - ForwardSpeed, pct);
-      lfMotor.spin(fwd, TurnSpeed + ForwardSpeed, pct);
-      lrMotor.spin(fwd, TurnSpeed + ForwardSpeed, pct);
-      rrmotor.spin(fwd, TurnSpeed - ForwardSpeed, pct);
+      RightDrive.spin(fwd, TurnSpeed - ForwardSpeed, pct);
+      LeftDrive.spin(fwd, TurnSpeed + ForwardSpeed, pct);
     }
 
     if(JakesJ0Y.ButtonL1.pressing()){
       IntakeMotor.spin(fwd, 100, pct);
-    } else if(JakesJ0Y.ButtonL2.pressing()){
+    } else if(JakesJ0Y.ButtonR1.pressing()){
       IntakeMotor.spin(reverse, 100, pct);
     } else {
       IntakeMotor.stop();
@@ -126,17 +125,23 @@ void usercontrol(void) {
     if(JakesJ0Y.ButtonRight.pressing()) {
       ClawSpinMotor.spin(fwd, 100, pct);
     } else if (JakesJ0Y.ButtonLeft.pressing()) {
-      ClawSpinMotor.spin(, 100, pct);
+      ClawSpinMotor.spin(reverse, 100, pct);
     } else {
       ClawSpinMotor.stop();
     }
 
-    if(JakesJ0Y.ButtonR2.pressing()) {
-      ClawMotor.spin(fwd, 100, pct);
-    } else if (JakesJ0Y.ButtonR1.pressing()) {
-      ClawMotor.spin(reverse, 100, pct);    
+    if(JakesJ0Y.ButtonL2.pressing()) {
+      ClawMotor.spin(fwd, 20, pct);
+    } else if (JakesJ0Y.ButtonR2.pressing()) {
+      ClawMotor.spin(reverse, 20, pct);    
     } else {
       ClawMotor.stop();
+    }
+
+    if(JakesJ0Y.ButtonA.pressing()) {
+      ToggleMotor.spin(fwd, 35, pct);
+    } else {
+      ToggleMotor.stop();
     }
 
 
